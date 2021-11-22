@@ -124,6 +124,11 @@ class User():
 
     @password.setter
     def password(self, password):
+        '''
+        Validates the password and once validated, enables the password to be added to the database
+        :param password:
+        :return:
+        '''
         if type(password) != str:
             raise TypeError("Password must be a string")
         elif len(password) < 8:

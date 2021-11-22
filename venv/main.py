@@ -17,6 +17,7 @@ class WelcomePage(QMainWindow):
         super(WelcomePage, self).__init__()
         uic.loadUi("p1-WelcomePage.ui", self)
         self.b_signUp.clicked.connect(self.openSignUp)
+        self.b_LogIn.clicked.connect(self.openSignIn)
 
     def openSignUp(self):
         '''
@@ -26,6 +27,11 @@ class WelcomePage(QMainWindow):
         widget.addWidget(nw)
         widget.setCurrentIndex(widget.currentIndex()+1)
 
+    def openSignIn(self):
+        nw = LogIn()
+        widget.addWidget(nw)
+        widget.setCurrentIndex(widget.currentIndex()+2)
+
 
 class SignupScreen(QDialog):
     def __init__(self):
@@ -33,6 +39,7 @@ class SignupScreen(QDialog):
         uic.loadUi("p1-SignUp.ui",self)
         self.i_pass.setEchoMode(QLineEdit.Password) # covers the text
         self.b_signUp.clicked.connect(self.signup)
+        self.b_back.clicked.connect(self.back)
 
     def signup(self):
         '''
@@ -46,13 +53,11 @@ class SignupScreen(QDialog):
             ability = "Standard"
         elif self.r_advanced.isChecked():
             ability = "Advanced"
-        print(ability)
 
         valid = True
         if len(user) == 0 or len(pword) == 0 or len(phone) == 0:
             self.l_error.setText("Please input all fields")
             valid = False
-        elif len(user) <
         elif len(phone) != 0 and len(phone) != 11:
             self.l_error.setText("Please enter a valid phone number.")
             valid = False
@@ -60,12 +65,20 @@ class SignupScreen(QDialog):
             self.l_error.setText("Please enter a password of at least 8 characters in length")
             valid = False
         if valid:
+            #Add the new user to the database
             con = get_database_connection()
             create_database(con)
-            # query = f'INSERT INTO users (username,password,phone) VALUES("{user}","{pword}","{phone}");'
-            # execute_query(con,query)
-            User(user,pword,phone,ability)
+            query = f'INSERT INTO users (username,password,phone,ability) VALUES("{user}","{pword}","{phone}","{ability}");'
+            execute_query(con,query)
+            # User(user,pword,phone,ability)
 
+    def back(self):
+        widget.setCurrentIndex(0)
+
+class LogIn(QDialog):
+    def __init__(self):
+        super(LogIn, self).__init__()
+        uic.loadUi("p2-SignIn.ui")
 
 window = WelcomePage()
 widget = QStackedWidget()
@@ -76,3 +89,13 @@ widget.setFixedWidth(625)
 widget.show()
 
 app.exec()
+
+# def hash_djb2(s):
+#     hash = 5381
+#     for x in s:
+#         hash = (( hash << 5) + hash) + ord(x)
+#     return hash & 0xFFFFFFFF
+#
+# print(hash_djb2("sri"))
+
+# print(hash("harsha"))
