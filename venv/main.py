@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import uic
 import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
-from sql import User
+from sql import UserDatabase
 
 app = QApplication(sys.argv)
 
@@ -23,14 +23,14 @@ class WelcomePage(QMainWindow):
         '''
         Switches tab to the sign up window
         '''
-        nw = SignupScreen()
-        widget.addWidget(nw)
-        widget.setCurrentIndex(widget.currentIndex()+1)
+        widget.setCurrentIndex(SignUpIndex)
 
     def openSignIn(self):
-        nw = LogIn()
-        widget.addWidget(nw)
-        widget.setCurrentIndex(widget.currentIndex()+2)
+        '''
+        opens the SignIn window
+        :return:
+        '''
+        widget.setCurrentIndex(SignInIndex)
 
 
 class SignupScreen(QDialog):
@@ -66,23 +66,76 @@ class SignupScreen(QDialog):
             valid = False
         if valid:
             #Add the new user to the database
-            con = get_database_connection()
-            create_database(con)
-            query = f'INSERT INTO users (username,password,phone,ability) VALUES("{user}","{pword}","{phone}","{ability}");'
-            execute_query(con,query)
-            # User(user,pword,phone,ability)
+            db = UserDatabase()
+            db.add_user(user,pword,phone,ability)
+            self.l_error.setText("Successfully made an account")
+            self.l_error.setStyleSheet("color:cyan")
 
     def back(self):
-        widget.setCurrentIndex(0)
+        widget.setCurrentIndex(0) #Takes the user to the Welcome screen
 
 class LogIn(QDialog):
     def __init__(self):
+        '''
+        Loads up the LogIn page
+        '''
         super(LogIn, self).__init__()
-        uic.loadUi("p2-SignIn.ui")
+        uic.loadUi("p2-SignIn.ui",self)
+        self.b_noAccount.clicked.connect(self.noAccount)
+        self.b_SignIn.clicked.connect(self.SignIn)
+        self.i_pass.setEchoMode(QLineEdit.Password) # covers the text
+        self.c_showPword.stateChanged.connect(self.showPass)  #Tracks changes to the state of the checkbox
+
+    def showPass(self, state):
+        '''
+        Hides or reveals the user input text into the password widget depending on state of checkbox
+        If checked - contents shown
+        :param state: State of the checkbox given by the connect function
+        '''
+        if state == Qt.Checked:
+            self.i_pass.setEchoMode(QLineEdit.Normal)
+        else:
+            self.i_pass.setEchoMode(QLineEdit.Password) # covers the text
+
+    def noAccount(self):
+        widget.setCurrentIndex(SignUpIndex)
+
+    def SignIn(self):
+        user = self.i_user.text()
+        pword = self.i_pass.text()
+
+        if len(user) == 0 or len(pword) == 0:
+            self.l_error.setText("Please input all fields")
+
+        else:
+            db = UserDatabase()
+            x = db.find_user(user)  # Searches the database using the search parameter: user
+            print(x)
+            if x != None:  # if the username is found and an account with that username exists verify the password
+                result_pass = x[2]  # The second index of the tuple returned contains the password
+                if result_pass == pword:
+                    print("login successful")
+                    self.l_error.setText("Login Successful")
+                    self.l_error.setStyleSheet("color: cyan”")
+                else:
+                    self.l_error.setText("Incorrect Password")
+            else:
+                self.l_error.setText("Username not found")
 
 window = WelcomePage()
 widget = QStackedWidget()
 widget.addWidget(window)
+
+#Add all the pages to the stack widget
+nw = SignupScreen()
+widget.addWidget(nw)
+SignUpIndex = 1
+
+nw = LogIn()
+widget.addWidget(nw)
+SignInIndex = 2
+
+#Define the dimensions and title of window
 widget.setWindowTitle("Helptrader")
 widget.setFixedHeight(500)
 widget.setFixedWidth(625)
@@ -95,7 +148,3 @@ app.exec()
 #     for x in s:
 #         hash = (( hash << 5) + hash) + ord(x)
 #     return hash & 0xFFFFFFFF
-#
-# print(hash_djb2("sri"))
-
-# print(hash("harsha"))

@@ -41,9 +41,16 @@ def print_tables(connection):
     print(tables_list)
 
 
-class User():
+class UserDatabase():
 
-    def __init__(self, username, password, phone, ability):
+    def __init__(self):
+        '''
+        Creates a database based on the schema if not already existent
+        '''
+        con = get_database_connection()
+        create_database(con)
+
+    def add_user(self, username, password, phone, ability):
         self.username = username
         self.password = password
         self.phone = phone
@@ -54,30 +61,38 @@ class User():
             c = get_database_connection()
             print("inserting...")
             execute_query(c, qry)
-            self.__ID = execute_query(c, "SELECT last_insert_rowid()") [0][0]
         except sqlite3.Error as e:
             print(e)
         finally:
             c.close()
 
-    def __del__(self):
-        qry = f'DELETE FROM users WHERE id={self.ID};'
+    # def __del__(self):
+    #     qry = f'DELETE FROM users WHERE id={self.ID};'
+    #     try:
+    #         c = get_database_connection()
+    #         execute_query(c, qry)
+    #     except sqlite3.Error as e:
+    #         print(e)
+    #     finally:
+    #         c.close()
+
+    def find_user(self,user):
+        '''
+        Locates the user's credentials in the database searching the column username
+        :param user: Submitted username used by the user to identify their account
+        :return: Database row with the user's credentials
+        '''
         try:
-            c = get_database_connection()
-            execute_query(c, qry)
-        except sqlite3.Error as e:
-            print(e)
-        finally:
-            c.close()
-
-    def find_user(self):
-        conn = get_database_connection()
-        qry = f"SELECT * FROM users where ID={self.ID}"
-        c = conn.cursor()
-        c.execute(qry)
-        print(str(c.fetchone()))
-        conn.commit()
-        conn.close()
+            con = get_database_connection()
+            cur = con.cursor()
+            query = f'SELECT * FROM users WHERE username= ?'
+            cur.execute(query,(user,))
+            result = cur.fetchone()
+            print("Try statement executed: find_user")  #debugging purposes
+            return result
+        except:
+            print("Except statement executed: find_user")
+            return None
 
     @property
     def phone(self):
