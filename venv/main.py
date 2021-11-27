@@ -3,12 +3,13 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit, QLabel,
     QStackedLayout,QPushButton, QTabWidget, QFormLayout, QTextEdit, QDialog, QStackedWidget
 )
-from PyQt5.QtGui import QPalette, QColor
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPalette, QColor, QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5 import uic
 import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
 from sql import UserDatabase
+import time
 
 app = QApplication(sys.argv)
 
@@ -117,10 +118,36 @@ class LogIn(QDialog):
                     print("login successful")
                     self.l_error.setText("Login Successful")
                     self.l_error.setStyleSheet("color: cyan”")
+                    time.sleep(4)
+                    widget.setCurrentIndex(MainPageIndex)
                 else:
                     self.l_error.setText("Incorrect Password")
             else:
                 self.l_error.setText("Username not found")
+
+class HomePage(QDialog):
+    def __init__(self):
+        '''
+        Loads up the LogIn page
+        '''
+        super(HomePage, self).__init__()
+        uic.loadUi("p3-HomePage.ui",self)
+        testData = ("Tesla","Apple","Meta","Walmart","Nio","Alphabet")
+
+        model = QStandardItemModel(len(testData),1)
+        # model.setHorizontalHeaderItem()
+
+        for i in range(len(testData)):
+            item = QStandardItem(testData[i])
+            model.setItem(i,0,item)
+
+        filter_model = QSortFilterProxyModel()
+        filter_model.setSourceModel(model)
+        filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
+        self.i_search.textChanged.connect(filter_model.setFilterRegExp)
+        self.t_assets.setModel(filter_model)
+
 
 window = WelcomePage()
 widget = QStackedWidget()
@@ -134,6 +161,12 @@ SignUpIndex = 1
 nw = LogIn()
 widget.addWidget(nw)
 SignInIndex = 2
+
+nw = HomePage()
+widget.addWidget(nw)
+MainPageIndex = 3
+
+widget.setCurrentIndex(MainPageIndex)
 
 #Define the dimensions and title of window
 widget.setWindowTitle("Helptrader")

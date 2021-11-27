@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>631</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>130</y>
+     <width>211</width>
+     <height>93</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="c_price_2">
+        <property name="font">
+         <font>
+          <family>Avenir</family>
+          <pointsize>13</pointsize>
+          <weight>50</weight>
+          <italic>false</italic>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Price</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="c_volume_2">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Volume</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="c_rsa_2">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>RSA indicator</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="c_pred_2">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Prediction</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="spacing">
+       <number>-1</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="c_support_2">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Support </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="c_resistance_2">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Resistance</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QLineEdit" name="i_search">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>240</y>
+     <width>391</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 13pt &quot;Avenir&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Search</string>
+   </property>
+   <property name="placeholderText">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QLabel" name="Title">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>40</y>
+     <width>261</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>0</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="font">
+    <font>
+     <family>Futura</family>
+     <pointsize>50</pointsize>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 50pt &quot;Futura&quot;;
+color: rgb(0, 112, 48);</string>
+   </property>
+   <property name="text">
+    <string>Helptrader</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>160</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Timeframe</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cb_ass_choice">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>130</y>
+     <width>104</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Stock</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Cryptocurrency</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Forex</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QComboBox" name="cb_Timeframe">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>180</y>
+     <width>104</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>1 day</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>4 hr </string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>1 hr</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>5 mins</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QTableView" name="t_assets">
+   <property name="geometry">
+    <rect>
+     <x>190</x>
+     <y>260</y>
+     <width>391</width>
+     <height>191</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>641</width>
+     <height>501</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(20, 38, 48);</string>
+   </property>
+   <widget class="Line" name="line">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>0</y>
+      <width>121</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Plain</enum>
+    </property>
+    <property name="lineWidth">
+     <number>5</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+  </widget>
+  <zorder>widget</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder>i_search</zorder>
+  <zorder>Title</zorder>
+  <zorder>label</zorder>
+  <zorder>cb_ass_choice</zorder>
+  <zorder>cb_Timeframe</zorder>
+  <zorder>t_assets</zorder>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
