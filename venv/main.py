@@ -1,7 +1,7 @@
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLineEdit, QLabel,
-    QStackedLayout,QPushButton, QTabWidget, QFormLayout, QTextEdit, QDialog, QStackedWidget
+    QStackedLayout,QPushButton, QTabWidget, QFormLayout, QTextEdit, QDialog, QStackedWidget, QHeaderView
 )
 from PyQt5.QtGui import QPalette, QColor, QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt, QSortFilterProxyModel
@@ -10,6 +10,7 @@ import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
 from sql import UserDatabase
 import time
+from Asset_data import dataModel, listStocks
 
 app = QApplication(sys.argv)
 
@@ -41,6 +42,7 @@ class SignupScreen(QDialog):
         self.i_pass.setEchoMode(QLineEdit.Password) # covers the text
         self.b_signUp.clicked.connect(self.signup)
         self.b_back.clicked.connect(self.back)
+        self.i_phone.setPlaceholderText("07123456789")
 
     def signup(self):
         '''
@@ -49,20 +51,33 @@ class SignupScreen(QDialog):
         '''
         user = self.i_user.text()
         pword = self.i_pass.text()
-        phone = self.i_phone.text()
-        if self.r_standard.isChecked():
+        phone = str(self.i_phone.text())
+        phone = phone.replace(" ","")  # removes spaces and white space in the user input
+        print(phone)
+        if self.r_standard.isChecked(): # Returns the status of the radiobuttons indicating user skill level
             ability = "Standard"
         elif self.r_advanced.isChecked():
             ability = "Advanced"
 
         valid = True
-        if len(user) == 0 or len(pword) == 0 or len(phone) == 0:
-            self.l_error.setText("Please input all fields")
+        if len(user) == 0 or len(pword) == 0:
+            self.l_error.setText("Please input all required fields")
             valid = False
-        elif len(phone) != 0 and len(phone) != 11:
-            self.l_error.setText("Please enter a valid phone number.")
-            valid = False
-        elif len(pword) < 8:
+        elif len(phone) != 0:
+            if phone[:2] != "07":
+                self.l_error.setText("Please enter a valid phone number with area code:07")
+                valid = False
+            try:
+                phone_value = int(phone)
+                if phone_value < 7000000000 or phone_value > 8000000000:
+                    # Checks that the phone number is 11 digits long
+                    self.l_error.setText("Please enter a valid phone number.")
+                    valid = False
+            except:
+                # if the int function fails, denotes that the user has inputted an invalid character in the phonenumber
+                self.l_error.setText("Please enter a valid phone number: only numbers")
+                valid = False
+        if len(pword) < 8:
             self.l_error.setText("Please enter a password of at least 8 characters in length")
             valid = False
         if valid:
@@ -99,9 +114,16 @@ class LogIn(QDialog):
             self.i_pass.setEchoMode(QLineEdit.Password) # covers the text
 
     def noAccount(self):
+        '''
+        Changes the stacked widget index to the sign Up page
+        '''
         widget.setCurrentIndex(SignUpIndex)
 
     def SignIn(self):
+        '''
+        Verifies the user's credentials in logging in.
+        :return:
+        '''
         user = self.i_user.text()
         pword = self.i_pass.text()
 
@@ -118,7 +140,6 @@ class LogIn(QDialog):
                     print("login successful")
                     self.l_error.setText("Login Successful")
                     self.l_error.setStyleSheet("color: cyan”")
-                    time.sleep(4)
                     widget.setCurrentIndex(MainPageIndex)
                 else:
                     self.l_error.setText("Incorrect Password")
@@ -126,37 +147,54 @@ class LogIn(QDialog):
                 self.l_error.setText("Username not found")
 
 class HomePage(QDialog):
+
     def __init__(self):
         '''
         Loads up the LogIn page
         '''
         super(HomePage, self).__init__()
         uic.loadUi("p3-HomePage.ui",self)
-        testData = ("Tesla","Apple","Meta","Walmart","Nio","Alphabet")
+        stockData = listStocks()
+        self.cb_ass_choice.currentIndexChanged.connect(self.assetChange)
 
-        model = QStandardItemModel(len(testData),1)
-        # model.setHorizontalHeaderItem()
+        #Logout button to redirect the user back to the welcome page
+        self.b_logout.clicked.connect(self.logout)
 
-        for i in range(len(testData)):
-            item = QStandardItem(testData[i])
-            model.setItem(i,0,item)
+        self.model = dataModel(stockData)  # creates a custom QAbstractModel using the data of stock
 
-        filter_model = QSortFilterProxyModel()
-        filter_model.setSourceModel(model)
-        filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filter_model = QSortFilterProxyModel()
+        self.filter_model.setSourceModel(self.model)
+        self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filter_model.setFilterKeyColumn(-1)  # filters using all columns
 
-        self.i_search.textChanged.connect(filter_model.setFilterRegExp)
-        self.t_assets.setModel(filter_model)
+        self.i_search.setPlaceholderText("Search")
+        self.i_search.textChanged.connect(self.filter_model.setFilterRegExp)
+        self.t_assets.setModel(self.filter_model)
+        # self.t_assets.resizeColumnToContents(1)
+        self.t_assets.setColumnWidth(1,250)
+        print(self.t_assets.horizontalHeader())
+        
+
+    def logout(self):
+        widget.setCurrentIndex(WelcomePageIndex)
+
+    def assetChange(self):
+        '''
+        Sets the model to stock, crypto or forex lists depending on the user's requirement
+        :return:
+        '''
+        print("method called: assetChange")
 
 
 window = WelcomePage()
 widget = QStackedWidget()
 widget.addWidget(window)
+WelcomePageIndex = 0
 
 #Add all the pages to the stack widget
 nw = SignupScreen()
 widget.addWidget(nw)
-SignUpIndex = 1
+SignUpIndex = 1 # index location of widget in the stacked widget for easy access
 
 nw = LogIn()
 widget.addWidget(nw)
@@ -166,8 +204,6 @@ nw = HomePage()
 widget.addWidget(nw)
 MainPageIndex = 3
 
-widget.setCurrentIndex(MainPageIndex)
-
 #Define the dimensions and title of window
 widget.setWindowTitle("Helptrader")
 widget.setFixedHeight(500)
@@ -175,9 +211,3 @@ widget.setFixedWidth(625)
 widget.show()
 
 app.exec()
-
-# def hash_djb2(s):
-#     hash = 5381
-#     for x in s:
-#         hash = (( hash << 5) + hash) + ord(x)
-#     return hash & 0xFFFFFFFF
