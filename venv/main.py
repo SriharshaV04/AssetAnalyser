@@ -10,7 +10,7 @@ import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
 from sql import UserDatabase
 import time
-from Asset_data import dataModel, listStocks
+from Asset_data import dataModel, listStocks, listForex
 
 app = QApplication(sys.argv)
 
@@ -91,6 +91,7 @@ class SignupScreen(QDialog):
         widget.setCurrentIndex(0) #Takes the user to the Welcome screen
 
 class LogIn(QDialog):
+
     def __init__(self):
         '''
         Loads up the LogIn page
@@ -133,14 +134,13 @@ class LogIn(QDialog):
         else:
             db = UserDatabase()
             x = db.find_user(user)  # Searches the database using the search parameter: user
-            print(x)
             if x != None:  # if the username is found and an account with that username exists verify the password
                 result_pass = x[2]  # The second index of the tuple returned contains the password
                 if result_pass == pword:
                     print("login successful")
                     self.l_error.setText("Login Successful")
                     self.l_error.setStyleSheet("color: cyan”")
-                    widget.setCurrentIndex(MainPageIndex)
+                    widget.setCurrentIndex(MainPageIndex)  # Sends the user into the main home page of the application
                 else:
                     self.l_error.setText("Incorrect Password")
             else:
@@ -160,7 +160,8 @@ class HomePage(QDialog):
         #Logout button to redirect the user back to the welcome page
         self.b_logout.clicked.connect(self.logout)
 
-        self.model = dataModel(stockData)  # creates a custom QAbstractModel using the data of stock
+        self.createTable()
+        self.t_assets.setModel(self.model)
 
         self.filter_model = QSortFilterProxyModel()
         self.filter_model.setSourceModel(self.model)
@@ -172,8 +173,42 @@ class HomePage(QDialog):
         self.t_assets.setModel(self.filter_model)
         # self.t_assets.resizeColumnToContents(1)
         self.t_assets.setColumnWidth(1,250)
-        print(self.t_assets.horizontalHeader())
+
         
+    def load_assets(self,asset_type):
+        if asset_type == "Stocks":
+            assets = listStocks()
+        elif asset_type == "Forex":
+            assets = listForex()
+
+        try:
+            self.model = dataModel(assets)  # creates a custom QAbstractModel using the data of stock
+
+            self.filter_model = QSortFilterProxyModel()
+            self.filter_model.setSourceModel(self.model)
+            self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+            self.filter_model.setFilterKeyColumn(-1)
+
+            self.i_search.textChanged.connect(self.filter_model.setFilterRegExp)
+            self.t_assets.setModel(self.filter_model)
+        except: pass
+
+    def createTable(self):
+        self.model = QStandardItemModel()
+        self.model.setHorizontalHeaderLabels(["Ticker","Name"])
+        assets = listStocks()
+        for asset in assets:
+            col1, col2 = self.createRow(asset)
+            self.model.appendRow([col1, col2])
+
+    def createRow(self,data:list):
+        col1 = QStandardItem()
+        col1.setCheckable(True)
+        col1.setText(data[0])
+
+        col2 = QStandardItem()
+        col2.setText(data[1])
+        return col1, col2
 
     def logout(self):
         widget.setCurrentIndex(WelcomePageIndex)
@@ -181,9 +216,14 @@ class HomePage(QDialog):
     def assetChange(self):
         '''
         Sets the model to stock, crypto or forex lists depending on the user's requirement
-        :return:
         '''
-        print("method called: assetChange")
+        asset_choice = self.cb_ass_choice.currentText()
+        self.load_assets(asset_choice)
+
+
+
+
+
 
 
 window = WelcomePage()
@@ -203,6 +243,7 @@ SignInIndex = 2
 nw = HomePage()
 widget.addWidget(nw)
 MainPageIndex = 3
+widget.setCurrentIndex(MainPageIndex)
 
 #Define the dimensions and title of window
 widget.setWindowTitle("Helptrader")

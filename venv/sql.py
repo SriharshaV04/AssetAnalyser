@@ -3,7 +3,6 @@ import sqlite3
 DB_NAME = "Users.db"
 SALT = "SV175926392"
 
-
 def get_database_connection():
     con = sqlite3.connect(DB_NAME)
     # for testing purposes using a database in memory

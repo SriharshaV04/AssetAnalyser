@@ -70,6 +70,9 @@ color: rgb(232, 229, 234);</string>
      <height>511</height>
     </rect>
    </property>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
    <property name="styleSheet">
     <string notr="true">QWidget#widget{
 background-color: rgb(20, 38, 48);
@@ -105,14 +108,28 @@ font: 35pt &quot;Avenir&quot;;</string>
    <widget class="QPushButton" name="b_noAccount">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>160</y>
+      <x>50</x>
+      <y>170</y>
       <width>171</width>
       <height>32</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(20, 38, 48)</string>
+     <string notr="true">background-color: rgb(20, 38, 48);
+color:red;
+text-decoration:underline;
+
+hover {
+
+  background: #61dafb;
+  color: black;
+  padding: 0.5em 1em;
+  transition: all 0.2s ease-in-out;
+  cursor: grab;
+}</string>
     </property>
     <property name="text">
      <string>I don't have an account</string>
@@ -121,11 +138,14 @@ font: 35pt &quot;Avenir&quot;;</string>
    <widget class="QPushButton" name="b_SignIn">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>450</y>
+      <x>260</x>
+      <y>170</y>
       <width>113</width>
       <height>32</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
     </property>
     <property name="text">
      <string>Sign In</string>
@@ -164,8 +184,8 @@ font: 13pt &quot;Avenir&quot;;</string>
    <widget class="QCheckBox" name="c_showPword">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>170</y>
+      <x>290</x>
+      <y>130</y>
       <width>181</width>
       <height>20</height>
      </rect>

@@ -14,16 +14,29 @@ def listStocks():
         lines = f.readlines()
         for line in lines:
             stock_data = line.split(",")
-            stock_data.pop()
-            # stock_data = line.split(",")
+            stock_data.pop() # removes the company
             stocks.append(stock_data)
     print(stocks)
     return stocks
+
+def listForex():
+    forex = []
+    with open("forex_pairs.csv","r") as f:
+        lines = f.readlines()
+        for line in lines:
+            forex_data = line.split(",")
+            fd = []
+            for unit in forex_data:
+                fd.append(unit.strip('"'))
+            forex.append(fd)
+
+    return forex
 
 class dataModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(dataModel, self).__init__()
         self._data = data
+        self.setHorizontalHeaderLabels(["stock"])
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -42,5 +55,6 @@ class dataModel(QtCore.QAbstractTableModel):
         return len(self._data[0])
 
 
-
+if __name__ == '__main__':
+    listStocks()
 
