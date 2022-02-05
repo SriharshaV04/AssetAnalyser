@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QStackedLayout,QPushButton, QTabWidget, QFormLayout, QTextEdit, QDialog, QStackedWidget, QHeaderView
 )
 from PyQt5.QtGui import QPalette, QColor, QStandardItemModel, QStandardItem
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSize
 from PyQt5 import uic
 import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
@@ -13,6 +13,9 @@ import time
 from Asset_data import dataModel, listStocks, listForex
 
 app = QApplication(sys.argv)
+CRYPTO_CURRENCIES = [['BTC',"Bitcoin"],["ETH","Ethereum"], ['LTC',"Litecoin"], ['EOS',""], ['XRP',"Ripple"], ['BCH',"Bitcoin Cash"],
+                     ['DOGE',"Dogecoin"], ["ICP","Internet Computer"]]
+
 
 class WelcomePage(QMainWindow):
     def __init__(self):
@@ -33,7 +36,6 @@ class WelcomePage(QMainWindow):
         :return:
         '''
         widget.setCurrentIndex(SignInIndex)
-
 
 class SignupScreen(QDialog):
     def __init__(self):
@@ -140,7 +142,8 @@ class LogIn(QDialog):
                     print("login successful")
                     self.l_error.setText("Login Successful")
                     self.l_error.setStyleSheet("color: cyan”")
-                    widget.setCurrentIndex(MainPageIndex)  # Sends the user into the main home page of the application
+                    widget.setCurrentIndex(MainPageIndex)
+                    widget.resize(750,600)  # Sends the user into the main home page of the application
                 else:
                     self.l_error.setText("Incorrect Password")
             else:
@@ -154,13 +157,40 @@ class HomePage(QDialog):
         '''
         super(HomePage, self).__init__()
         uic.loadUi("p3-HomePage.ui",self)
-        stockData = listStocks()
-        self.cb_ass_choice.currentIndexChanged.connect(self.assetChange)
+
+        self.cb_ass_choice.currentIndexChanged.connect(self.create_update_Table)
+        self.b_display.clicked.connect(self.display)
 
         #Logout button to redirect the user back to the welcome page
         self.b_logout.clicked.connect(self.logout)
 
-        self.createTable()
+        self.create_update_Table()
+
+    def create_update_Table(self):
+        self.model = QStandardItemModel()
+        asset_type = self.cb_ass_choice.currentText() # Retrieves the value from the comboBox
+        if asset_type == "Stock":
+            self.model.setHorizontalHeaderLabels(["Ticker","Name"])
+            assets = listStocks() # loads the stocks the program will use from the stocks.csv
+            self.c_pred.setEnabled(False)
+        elif asset_type == "Forex":
+            self.model.setHorizontalHeaderLabels(["Currency Pair", "From", "To"])
+            assets = listForex()  # loads the forex pairs the program will use from the forex_pairs.csv
+            self.c_pred.setEnabled(False)
+        else:
+            self.model.setHorizontalHeaderLabels(["Code", "Name"])
+            assets = CRYPTO_CURRENCIES
+            self.c_pred.setEnabled(True)
+
+        for asset in assets:
+            # adds the data to the model
+            try:
+                col1,col2,col3 = self.createRow(asset)
+                self.model.appendRow([col1, col2, col3])
+            except:
+                col1, col2 = self.createRow(asset)
+                self.model.appendRow([col1, col2])
+
         self.t_assets.setModel(self.model)
 
         self.filter_model = QSortFilterProxyModel()
@@ -171,35 +201,7 @@ class HomePage(QDialog):
         self.i_search.setPlaceholderText("Search")
         self.i_search.textChanged.connect(self.filter_model.setFilterRegExp)
         self.t_assets.setModel(self.filter_model)
-        # self.t_assets.resizeColumnToContents(1)
-        self.t_assets.setColumnWidth(1,250)
-
-        
-    def load_assets(self,asset_type):
-        if asset_type == "Stocks":
-            assets = listStocks()
-        elif asset_type == "Forex":
-            assets = listForex()
-
-        try:
-            self.model = dataModel(assets)  # creates a custom QAbstractModel using the data of stock
-
-            self.filter_model = QSortFilterProxyModel()
-            self.filter_model.setSourceModel(self.model)
-            self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-            self.filter_model.setFilterKeyColumn(-1)
-
-            self.i_search.textChanged.connect(self.filter_model.setFilterRegExp)
-            self.t_assets.setModel(self.filter_model)
-        except: pass
-
-    def createTable(self):
-        self.model = QStandardItemModel()
-        self.model.setHorizontalHeaderLabels(["Ticker","Name"])
-        assets = listStocks()
-        for asset in assets:
-            col1, col2 = self.createRow(asset)
-            self.model.appendRow([col1, col2])
+        self.t_assets.setColumnWidth(1, 250)
 
     def createRow(self,data:list):
         col1 = QStandardItem()
@@ -208,47 +210,75 @@ class HomePage(QDialog):
 
         col2 = QStandardItem()
         col2.setText(data[1])
+
+        try:
+            col3 = QStandardItem()
+            col3.setText(data[2])
+            return col1, col2, col3
+        except: pass
         return col1, col2
 
     def logout(self):
         widget.setCurrentIndex(WelcomePageIndex)
+        widget.resize(625,500)
 
-    def assetChange(self):
-        '''
-        Sets the model to stock, crypto or forex lists depending on the user's requirement
-        '''
-        asset_choice = self.cb_ass_choice.currentText()
-        self.load_assets(asset_choice)
+    def display(self):
+        self.assetsToDraw = []
+
+        for row in range(self.model.rowCount()):
+            if self.model.item(row,0).checkState() == Qt.Checked:
+                self.assetsToDraw.append(self.model.item(row,0).text())
+
+        if len(self.assetsToDraw) > 5:
+            self.l_error.setText("Please select a maximum of 5 assets to view")
+        elif len(self.assetsToDraw) == 0:
+            self.l_error.setText("Please select at least 1 asset to view")
+        else:
+            self.l_error.setText("")
+
+            info = {
+                "Assets":self.assetsToDraw,
+                "Price":self.c_price.checkState(),
+                "Volume":self.c_volume.checkState(),
+                "Support":self.c_support.checkState(),
+                "Resistance":self.c_resistance.checkState(),
+                "RSA":self.c_rsa.checkState(),
+                "Prediction":self.c_pred.checkState(),
+            }
+            ChartPage(info)  # Creates the chart page using the info in the next phase
+
+
+class ChartPage(QWidget):
+    def __init__(self,info):
+        pass
 
 
 
+if __name__ == '__main__':
+    window = WelcomePage()
+    widget = QStackedWidget()
+    widget.addWidget(window)
+    WelcomePageIndex = 0
 
+    #Add all the pages to the stack widget
+    nw = SignupScreen()
+    widget.addWidget(nw)
+    SignUpIndex = 1 # index location of widget in the stacked widget for easy access
 
+    nw = LogIn()
+    widget.addWidget(nw)
+    SignInIndex = 2
 
+    nw = HomePage()
+    widget.addWidget(nw)
+    MainPageIndex = 3
+    widget.setCurrentIndex(MainPageIndex)
+    widget.setGeometry(0,0,750,600)
 
-window = WelcomePage()
-widget = QStackedWidget()
-widget.addWidget(window)
-WelcomePageIndex = 0
+    #Define the dimensions and title of window
+    widget.setWindowTitle("Helptrader")
+    # widget.setGeometry(450,250,625,500)
 
-#Add all the pages to the stack widget
-nw = SignupScreen()
-widget.addWidget(nw)
-SignUpIndex = 1 # index location of widget in the stacked widget for easy access
+    widget.show()
 
-nw = LogIn()
-widget.addWidget(nw)
-SignInIndex = 2
-
-nw = HomePage()
-widget.addWidget(nw)
-MainPageIndex = 3
-widget.setCurrentIndex(MainPageIndex)
-
-#Define the dimensions and title of window
-widget.setWindowTitle("Helptrader")
-widget.setFixedHeight(500)
-widget.setFixedWidth(625)
-widget.show()
-
-app.exec()
+    app.exec()

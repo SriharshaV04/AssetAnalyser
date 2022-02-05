@@ -28,6 +28,7 @@ def listForex():
             fd = []
             for unit in forex_data:
                 fd.append(unit.strip('"'))
+            fd[2] = fd[2][:-2] # Removing the new line character from the last each line
             forex.append(fd)
 
     return forex
@@ -56,5 +57,5 @@ class dataModel(QtCore.QAbstractTableModel):
 
 
 if __name__ == '__main__':
-    listStocks()
+    listForex()
 
