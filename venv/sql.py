@@ -1,6 +1,7 @@
 import sqlite3
 
 DB_NAME = "Users.db"
+testDB = "Test.db"
 SALT = "SV175926392"
 
 def get_database_connection():
@@ -65,15 +66,20 @@ class UserDatabase():
         finally:
             c.close()
 
-    # def __del__(self):
-    #     qry = f'DELETE FROM users WHERE id={self.ID};'
-    #     try:
-    #         c = get_database_connection()
-    #         execute_query(c, qry)
-    #     except sqlite3.Error as e:
-    #         print(e)
-    #     finally:
-    #         c.close()
+    def update_ability(self,ability,user):
+        try:
+            con = get_database_connection()
+            query = f'UPDATE users SET ability = "{ability}" WHERE username = "{user}"'
+            execute_query(con,query)
+            # cur.execute(query)
+            # cur.close()
+            print("Update has taken place")
+            x = self.find_user(user)
+            print(x)
+        except:
+            print("Except statement executed: update_ability")
+            return None
+
 
     def find_user(self,user):
         '''
@@ -87,6 +93,7 @@ class UserDatabase():
             query = f'SELECT * FROM users WHERE username= ?'
             cur.execute(query,(user,))
             result = cur.fetchone()
+            print(result)
             print("Try statement executed: find_user")  #debugging purposes
             return result
         except:
@@ -150,3 +157,7 @@ class UserDatabase():
         # TODO: Add more validation
         else:
             self.__password = password
+
+if __name__ == '__main__':
+    con = get_database_connection()
+    create_database(con)

@@ -10,7 +10,10 @@ import sqlite3
 from sql import create_database, get_database_connection, execute_query, print_tables
 from sql import UserDatabase
 import time
-from Asset_data import dataModel, listStocks, listForex
+from Asset_data import listStocks, listForex, ChartPage
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+
 
 app = QApplication(sys.argv)
 CRYPTO_CURRENCIES = [['BTC',"Bitcoin"],["ETH","Ethereum"], ['LTC',"Litecoin"], ['EOS',""], ['XRP',"Ripple"], ['BCH',"Bitcoin Cash"],
@@ -62,7 +65,7 @@ class SignupScreen(QDialog):
             ability = "Advanced"
 
         valid = True
-        if len(user) == 0 or len(pword) == 0:
+        if len(user) == 0 or len(pword) == 0 or len(phone) == 0:
             self.l_error.setText("Please input all required fields")
             valid = False
         elif len(phone) != 0:
@@ -88,6 +91,9 @@ class SignupScreen(QDialog):
             db.add_user(user,pword,phone,ability)
             self.l_error.setText("Successfully made an account")
             self.l_error.setStyleSheet("color:cyan")
+            home.presets(user)
+            widget.setCurrentIndex(MainPageIndex)
+            widget.resize(750, 600)
 
     def back(self):
         widget.setCurrentIndex(0) #Takes the user to the Welcome screen
@@ -138,12 +144,13 @@ class LogIn(QDialog):
             x = db.find_user(user)  # Searches the database using the search parameter: user
             if x != None:  # if the username is found and an account with that username exists verify the password
                 result_pass = x[2]  # The second index of the tuple returned contains the password
+                home.presets(user)
                 if result_pass == pword:
                     print("login successful")
                     self.l_error.setText("Login Successful")
                     self.l_error.setStyleSheet("color: cyan”")
-                    widget.setCurrentIndex(MainPageIndex)
-                    widget.resize(750,600)  # Sends the user into the main home page of the application
+                    widget.setCurrentIndex(MainPageIndex) # Switches to the home page
+                    widget.resize(750,600)
                 else:
                     self.l_error.setText("Incorrect Password")
             else:
@@ -165,6 +172,8 @@ class HomePage(QDialog):
         self.b_logout.clicked.connect(self.logout)
 
         self.create_update_Table()
+        self.rb_standard.toggled.connect(self.changePreset)
+        self.rb_advanced.toggled.connect(self.changePreset)
 
     def create_update_Table(self):
         self.model = QStandardItemModel()
@@ -229,30 +238,58 @@ class HomePage(QDialog):
             if self.model.item(row,0).checkState() == Qt.Checked:
                 self.assetsToDraw.append(self.model.item(row,0).text())
 
-        if len(self.assetsToDraw) > 5:
-            self.l_error.setText("Please select a maximum of 5 assets to view")
+        if len(self.assetsToDraw) > 3:
+            self.l_error.setText("Please select a maximum of 3 assets to view")
         elif len(self.assetsToDraw) == 0:
             self.l_error.setText("Please select at least 1 asset to view")
         else:
             self.l_error.setText("")
 
             info = {
+                "Asset Type":self.cb_ass_choice.currentText(),
                 "Assets":self.assetsToDraw,
-                "Price":self.c_price.checkState(),
-                "Volume":self.c_volume.checkState(),
-                "Support":self.c_support.checkState(),
-                "Resistance":self.c_resistance.checkState(),
-                "RSA":self.c_rsa.checkState(),
-                "Prediction":self.c_pred.checkState(),
+                "Price":self.c_price.isChecked(),
+                "Volume":self.c_volume.isChecked(),
+                "Support":self.c_support.isChecked(),
+                "Resistance":self.c_resistance.isChecked(),
+                "RSA":self.c_rsa.isChecked(),   # Parameters for RSA = (11)
+                "Prediction":self.c_pred.isChecked(),
+                "TimeFrame":self.cb_Timeframe.currentText()  # intervals: "1 day","1 hr", "5 mins"
             }
-            ChartPage(info)  # Creates the chart page using the info in the next phase
+            for key,value in info.items():
+                print(key,":", value)
+            w = ChartPage(info)  # Creates the chart page using the info in the next phase
+            w.show()
 
+    def presets(self,user):
+        self.user = user  # Saves the user currently logged in as an attribute of the class
+        db = UserDatabase()
+        x = db.find_user(user)
+        self.skill = x[3]  # Retrieves the data from the skill field in the record
+        if self.skill == "Advanced":
+            self.c_support.setChecked(True)
+            self.c_resistance.setChecked(True)
+            self.c_rsa.setChecked(True)
+            self.rb_advanced.setChecked(True)
+        else:
+            self.rb_standard.setChecked(True)
 
-class ChartPage(QWidget):
-    def __init__(self,info):
-        pass
-
-
+    def changePreset(self):
+        db = UserDatabase()
+        if self.rb_standard.isChecked():
+            self.c_support.setChecked(False)
+            self.c_resistance.setChecked(False)
+            self.c_rsa.setChecked(False)
+            self.c_price.setChecked(True)
+            self.c_volume.setChecked(True)
+            db.update_ability("Standard",self.user)
+        else:
+            self.c_support.setChecked(True)
+            self.c_resistance.setChecked(True)
+            self.c_rsa.setChecked(True)
+            self.c_price.setChecked(True)
+            self.c_volume.setChecked(True)
+            db.update_ability("Advanced",self.user)
 
 if __name__ == '__main__':
     window = WelcomePage()
@@ -269,15 +306,13 @@ if __name__ == '__main__':
     widget.addWidget(nw)
     SignInIndex = 2
 
-    nw = HomePage()
-    widget.addWidget(nw)
+    home = HomePage()
+    widget.addWidget(home)
     MainPageIndex = 3
-    widget.setCurrentIndex(MainPageIndex)
-    widget.setGeometry(0,0,750,600)
 
     #Define the dimensions and title of window
     widget.setWindowTitle("Helptrader")
-    # widget.setGeometry(450,250,625,500)
+    widget.setGeometry(450,250,625,500)
 
     widget.show()
 

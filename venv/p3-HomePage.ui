@@ -226,11 +226,6 @@ font: 13pt &quot;Avenir&quot;;</string>
    </item>
    <item>
     <property name="text">
-     <string>4 hr </string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
      <string>1 hr</string>
     </property>
    </item>
@@ -339,6 +334,57 @@ font: 13pt &quot;Avenir&quot;;</string>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="rb_standard">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>520</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Standard</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="rb_advanced">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>490</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Advanced</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>460</y>
+      <width>60</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+    </property>
+    <property name="text">
+     <string>Presets:</string>
     </property>
    </widget>
   </widget>
