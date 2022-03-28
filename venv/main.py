@@ -258,8 +258,8 @@ class HomePage(QDialog):
             }
             for key,value in info.items():
                 print(key,":", value)
-            w = ChartPage(info)  # Creates the chart page using the info in the next phase
-            w.show()
+            self.w = ChartPage(info)  # Creates the chart page using the info in the next phase
+            self.w.show()
 
     def presets(self,user):
         self.user = user  # Saves the user currently logged in as an attribute of the class
