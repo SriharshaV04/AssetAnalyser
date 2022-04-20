@@ -11,9 +11,6 @@ from sql import create_database, get_database_connection, execute_query, print_t
 from sql import UserDatabase
 import time
 from Asset_data import listStocks, listForex, ChartPage
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-
 
 app = QApplication(sys.argv)
 CRYPTO_CURRENCIES = [['BTC',"Bitcoin"],["ETH","Ethereum"], ['LTC',"Litecoin"], ['EOS',""], ['XRP',"Ripple"], ['BCH',"Bitcoin Cash"],
@@ -85,9 +82,21 @@ class SignupScreen(QDialog):
         if len(pword) < 8:
             self.l_error.setText("Please enter a password of at least 8 characters in length")
             valid = False
+        elif len(user) > 15:
+            self.l_error.setText("Please enter a username of maximum length of 15")
+            valid = False
+
+        # Validating unique username
+        db = UserDatabase()
+        names = db.find_all()
+        for name in names:
+            if user == name:
+                valid = False
+                self.l_error.setText("Username taken")
+                break
+
         if valid:
             #Add the new user to the database
-            db = UserDatabase()
             db.add_user(user,pword,phone,ability)
             self.l_error.setText("Successfully made an account")
             self.l_error.setStyleSheet("color:cyan")
@@ -148,7 +157,7 @@ class LogIn(QDialog):
                 if result_pass == pword:
                     print("login successful")
                     self.l_error.setText("Login Successful")
-                    self.l_error.setStyleSheet("color: cyan”")
+                    self.l_error.setStyleSheet("color: cyan")
                     widget.setCurrentIndex(MainPageIndex) # Switches to the home page
                     widget.resize(750,600)
                 else:
@@ -174,6 +183,11 @@ class HomePage(QDialog):
         self.create_update_Table()
         self.rb_standard.toggled.connect(self.changePreset)
         self.rb_advanced.toggled.connect(self.changePreset)
+        self.setStyleSheet('''QToolTip { 
+                                   background-color: #000000;  
+                                   }''') # Ensures the tooltip is visible on the page
+        self.c_ma.setToolTip("Simple moving average showing average price over last 20 days")
+        self.c_colourb.setToolTip("Produces a colour-blind chart using blue and black rather than green and red")
 
     def create_update_Table(self):
         self.model = QStandardItemModel()
@@ -182,14 +196,20 @@ class HomePage(QDialog):
             self.model.setHorizontalHeaderLabels(["Ticker","Name"])
             assets = listStocks() # loads the stocks the program will use from the stocks.csv
             self.c_pred.setEnabled(False)
+            self.c_pred.setCheckState(False)
+            self.c_volume.setEnabled(True)
         elif asset_type == "Forex":
             self.model.setHorizontalHeaderLabels(["Currency Pair", "From", "To"])
             assets = listForex()  # loads the forex pairs the program will use from the forex_pairs.csv
             self.c_pred.setEnabled(False)
+            self.c_pred.setCheckState(False)
+            self.c_volume.setEnabled(False)
+            self.c_volume.setCheckState(False)
         else:
             self.model.setHorizontalHeaderLabels(["Code", "Name"])
             assets = CRYPTO_CURRENCIES
             self.c_pred.setEnabled(True)
+            self.c_volume.setEnabled(True)
 
         for asset in assets:
             # adds the data to the model
@@ -219,10 +239,12 @@ class HomePage(QDialog):
 
         col2 = QStandardItem()
         col2.setText(data[1])
+        col2.setFlags(Qt.ItemIsEnabled) # Makes the cell read only  ERROR
 
         try:
             col3 = QStandardItem()
             col3.setText(data[2])
+            col3.setFlags(Qt.ItemIsEnabled)
             return col1, col2, col3
         except: pass
         return col1, col2
@@ -252,8 +274,9 @@ class HomePage(QDialog):
                 "Volume":self.c_volume.isChecked(),
                 "Support":self.c_support.isChecked(),
                 "Resistance":self.c_resistance.isChecked(),
-                "RSA":self.c_rsa.isChecked(),   # Parameters for RSA = (11)
+                "MA":self.c_ma.isChecked(),   # Parameters for ma = (20 days)
                 "Prediction":self.c_pred.isChecked(),
+                "Colour Blind":self.c_colourb.isChecked(),
                 "TimeFrame":self.cb_Timeframe.currentText()  # intervals: "1 day","1 hr", "5 mins"
             }
             for key,value in info.items():
@@ -269,7 +292,7 @@ class HomePage(QDialog):
         if self.skill == "Advanced":
             self.c_support.setChecked(True)
             self.c_resistance.setChecked(True)
-            self.c_rsa.setChecked(True)
+            self.c_ma.setChecked(True)
             self.rb_advanced.setChecked(True)
         else:
             self.rb_standard.setChecked(True)
@@ -279,14 +302,14 @@ class HomePage(QDialog):
         if self.rb_standard.isChecked():
             self.c_support.setChecked(False)
             self.c_resistance.setChecked(False)
-            self.c_rsa.setChecked(False)
+            self.c_ma.setChecked(False)
             self.c_price.setChecked(True)
             self.c_volume.setChecked(True)
             db.update_ability("Standard",self.user)
         else:
             self.c_support.setChecked(True)
             self.c_resistance.setChecked(True)
-            self.c_rsa.setChecked(True)
+            self.c_ma.setChecked(True)
             self.c_price.setChecked(True)
             self.c_volume.setChecked(True)
             db.update_ability("Advanced",self.user)

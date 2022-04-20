@@ -20,6 +20,7 @@ def execute_query(connection, query):
         return cursor.fetchall()
     except sqlite3.Error as e:
         print(f"The error '{e}' occurred")
+        return False
 
 
 def create_database(connection):
@@ -100,6 +101,18 @@ class UserDatabase():
             print("Except statement executed: find_user")
             return None
 
+    def find_all(self):
+        try:
+            con = get_database_connection()
+            query = f'SELECT username FROM users'
+            data = execute_query(con, query)
+            names = []
+            for name in data:
+                names.append(name[0])
+            return names
+        except:
+            print("Except statement executed: find_all")
+
     @property
     def phone(self):
         return self.__phone
@@ -129,7 +142,7 @@ class UserDatabase():
 
     @username.setter
     def username(self, username):
-        if len(username) < 2 or len(username) > 15:
+        if len(username) > 15:
             raise ValueError("username must be between 2 and 15 characters long")
         else:
             self.__username = username
@@ -160,4 +173,5 @@ class UserDatabase():
 
 if __name__ == '__main__':
     con = get_database_connection()
-    create_database(con)
+    db = UserDatabase()
+    db.find_all()

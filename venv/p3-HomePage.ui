@@ -18,7 +18,7 @@
     <rect>
      <x>320</x>
      <y>130</y>
-     <width>211</width>
+     <width>243</width>
      <height>93</height>
     </rect>
    </property>
@@ -63,13 +63,13 @@ font: 13pt &quot;Avenir&quot;;</string>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="c_rsa">
+       <widget class="QCheckBox" name="c_ma">
         <property name="styleSheet">
          <string notr="true">color: rgb(232, 229, 234);
 font: 13pt &quot;Avenir&quot;;</string>
         </property>
         <property name="text">
-         <string>RSA indicator</string>
+         <string>SMA indicator</string>
         </property>
        </widget>
       </item>
@@ -110,6 +110,17 @@ font: 13pt &quot;Avenir&quot;;</string>
         </property>
         <property name="text">
          <string>Resistance</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="c_colourb">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(232, 229, 234);
+font: 13pt &quot;Avenir&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Colour-blindness</string>
         </property>
        </widget>
       </item>
@@ -294,7 +305,7 @@ border-radius:10px</string>
     <string>Display</string>
    </property>
   </widget>
-  <widget class="QWidget" name="widget" native="true">
+  <widget class="QWidget" name="c_colorb" native="true">
    <property name="geometry">
     <rect>
      <x>-10</x>
@@ -388,7 +399,7 @@ font: 13pt &quot;Avenir&quot;;</string>
     </property>
    </widget>
   </widget>
-  <zorder>widget</zorder>
+  <zorder>c_colorb</zorder>
   <zorder>layoutWidget</zorder>
   <zorder>i_search</zorder>
   <zorder>Title</zorder>
