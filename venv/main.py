@@ -7,10 +7,12 @@ from PyQt5.QtGui import QPalette, QColor, QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QSize
 from PyQt5 import uic
 import sqlite3
-from sql import create_database, get_database_connection, execute_query, print_tables
+from sql import create_database, get_database_connection, execute_query
 from sql import UserDatabase
 import time
 from Asset_data import listStocks, listForex, ChartPage
+
+
 
 app = QApplication(sys.argv)
 CRYPTO_CURRENCIES = [['BTC',"Bitcoin"],["ETH","Ethereum"], ['LTC',"Litecoin"], ['EOS',""], ['XRP',"Ripple"], ['BCH',"Bitcoin Cash"],
@@ -100,7 +102,7 @@ class SignupScreen(QDialog):
             db.add_user(user,pword,phone,ability)
             self.l_error.setText("Successfully made an account")
             self.l_error.setStyleSheet("color:cyan")
-            home.presets(user)
+            home.presets(user)  # Formats the homepage with the user's preset
             widget.setCurrentIndex(MainPageIndex)
             widget.resize(750, 600)
 
@@ -144,6 +146,7 @@ class LogIn(QDialog):
         '''
         user = self.i_user.text()
         pword = self.i_pass.text()
+        self.l_error.setStyleSheet("color: red")
 
         if len(user) == 0 or len(pword) == 0:
             self.l_error.setText("Please input all fields")
@@ -190,6 +193,9 @@ class HomePage(QDialog):
         self.c_colourb.setToolTip("Produces a colour-blind chart using blue and black rather than green and red")
 
     def create_update_Table(self):
+        '''
+        Updates and formats the table to display the assets available in the program
+        '''
         self.model = QStandardItemModel()
         asset_type = self.cb_ass_choice.currentText() # Retrieves the value from the comboBox
         if asset_type == "Stock":
@@ -233,6 +239,11 @@ class HomePage(QDialog):
         self.t_assets.setColumnWidth(1, 250)
 
     def createRow(self,data:list):
+        '''
+        Creates standard items in the required format to put into the asset table
+        :param data: A list of assets
+        :return: QStandardItems of each asset and its corresponding data
+        '''
         col1 = QStandardItem()
         col1.setCheckable(True)
         col1.setText(data[0])
@@ -287,8 +298,8 @@ class HomePage(QDialog):
     def presets(self,user):
         self.user = user  # Saves the user currently logged in as an attribute of the class
         db = UserDatabase()
-        x = db.find_user(user)
-        self.skill = x[3]  # Retrieves the data from the skill field in the record
+        result = db.find_user(user)
+        self.skill = result[3]  # Retrieves the data from the skill field in the record
         if self.skill == "Advanced":
             self.c_support.setChecked(True)
             self.c_resistance.setChecked(True)

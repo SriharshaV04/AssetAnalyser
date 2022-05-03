@@ -6,8 +6,6 @@ SALT = "SV175926392"
 
 def get_database_connection():
     con = sqlite3.connect(DB_NAME)
-    # for testing purposes using a database in memory
-    # con = sqlite3.connect(':memory:')
     return con
 
 
@@ -15,7 +13,7 @@ def execute_query(connection, query):
     cursor = connection.cursor()
     try:
         cursor.execute(query)
-        connection.commit()
+        connection.commit() # ensures the query is durable and will remain in the database
         print("Query executed successfully")
         return cursor.fetchall()
     except sqlite3.Error as e:
@@ -31,16 +29,6 @@ def create_database(connection):
         print("database created")
     except sqlite3.Error as e:
         print(f"The error '{e}' occurred")
-
-
-def print_tables(connection):
-    query = "SELECT name FROM sqlite_master WHERE type='table';"
-    tables = execute_query(connection, query)
-    tables_list = []
-    for item in tables:
-        tables_list.append(item[0])
-    print(tables_list)
-
 
 class UserDatabase():
 
@@ -72,11 +60,9 @@ class UserDatabase():
             con = get_database_connection()
             query = f'UPDATE users SET ability = "{ability}" WHERE username = "{user}"'
             execute_query(con,query)
-            # cur.execute(query)
-            # cur.close()
             print("Update has taken place")
-            x = self.find_user(user)
-            print(x)
+            results = self.find_user(user)
+            print(results)
         except:
             print("Except statement executed: update_ability")
             return None
@@ -167,7 +153,6 @@ class UserDatabase():
             raise TypeError("Password must be a string")
         elif len(password) < 8:
             raise ValueError("Password is too short must be at least 8 characters")
-        # TODO: Add more validation
         else:
             self.__password = password
 

@@ -53,7 +53,7 @@ class ChartPage(QtWidgets.QMainWindow):
         url = "https://www.google.com"
         timeout = 5
         try:
-            requests.get(url,timeout=timeout)
+            requests.get(url,timeout=timeout)  # tries to access google
         except:
             # win = QtWidgets.QMainWindow()
             label = QtWidgets.QLabel("Please check your internet connection and try again")
@@ -94,10 +94,10 @@ class ChartPage(QtWidgets.QMainWindow):
             self.date_format = '%b %d' # Displays month and day number
             return asset.history(period="6mo",interval="1d")
         elif self.info["TimeFrame"] == "1 hr":
-            self.date_format = '%a %H' # Displays time and day
+            self.date_format = '%a' # Displays time and day
             return asset.history(period="5d",interval="1h")
         else:
-            self.date_format = '%a %H'
+            self.date_format = '%I : %M'
             return asset.history(period="1d",interval="5m")
 
     def support(self, data):
@@ -227,8 +227,8 @@ class ChartPage(QtWidgets.QMainWindow):
                 if i > 2:
                     print("Asset inputs exceed the limit of 3")
                     break
-                ax = canvas.figure.add_subplot(2,3,i+1)
-                vx = canvas.figure.add_subplot(2,3,i+4)
+                ax = canvas.figure.add_subplot(2,3,i+1)  # price axis
+                vx = canvas.figure.add_subplot(2,3,i+4)  # volume axis
                 df = self.retrieve_data(asset)
                 adplts = self.plot_analysis(asset, ax)  # Retrieves the support and resistance analysis if required
                 if self.info["MA"] == True:
